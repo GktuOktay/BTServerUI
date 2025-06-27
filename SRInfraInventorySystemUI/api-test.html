@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Bağlantı Testi</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Bağlantı Testi</h1>
+        
+        <div class="test-section info">
+            <h3>Test Edilecek API:</h3>
+            <p><strong>Base URL:</strong> <span id="api-url">https://localhost:7239</span></p>
+            <p><strong>Endpoint:</strong> /api/Department</p>
+        </div>
+
+        <div class="test-section">
+            <h3>Testler:</h3>
+            <button onclick="testApiConnection()">1. API Bağlantısını Test Et</button>
+            <button onclick="testDepartmentList()">2. Departman Listesini Test Et</button>
+            <button onclick="testCorsHeaders()">3. CORS Headers Test Et</button>
+            <button onclick="clearResults()">Sonuçları Temizle</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://localhost:7239';
+        
+        function addResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-section ${type}`;
+            resultDiv.innerHTML = `
+                <h4>${title}</h4>
+                <pre>${content}</pre>
+                <small>Zaman: ${new Date().toLocaleString()}</small>
+            `;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testApiConnection() {
+            try {
+                addResult('🔄 API Bağlantı Testi Başlatılıyor...', 'Bağlantı test ediliyor...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/api/Department`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: {},
+                    url: response.url
+                };
+
+                // Headers'ı al
+                response.headers.forEach((value, key) => {
+                    result.headers[key] = value;
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult('✅ API Bağlantısı Başarılı', 
+                        `Status: ${result.status} ${result.statusText}\n` +
+                        `URL: ${result.url}\n` +
+                        `Headers: ${JSON.stringify(result.headers, null, 2)}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`, 
+                        'success'
+                    );
+                } else {
+                    const errorText = await response.text();
+                    addResult('❌ API Bağlantısı Başarısız', 
+                        `Status: ${result.status} ${result.statusText}\n` +
+                        `URL: ${result.url}\n` +
+                        `Headers: ${JSON.stringify(result.headers, null, 2)}\n` +
+                        `Error: ${errorText}`, 
+                        'error'
+                    );
+                }
+            } catch (error) {
+                addResult('❌ Bağlantı Hatası', 
+                    `Error: ${error.message}\n` +
+                    `Stack: ${error.stack}`, 
+                    'error'
+                );
+            }
+        }
+
+        async function testDepartmentList() {
+            try {
+                addResult('🔄 Departman Listesi Testi...', 'Departmanlar yükleniyor...', 'info');
+                
+                const params = new URLSearchParams({
+                    pageNumber: 1,
+                    pageSize: 10
+                });
+
+                const response = await fetch(`${API_BASE_URL}/api/Department?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult('✅ Departman Listesi Başarılı', 
+                        `Status: ${response.status}\n` +
+                        `Data Count: ${data.data ? data.data.length : 'N/A'}\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`, 
+                        'success'
+                    );
+                } else {
+                    const errorText = await response.text();
+                    addResult('❌ Departman Listesi Hatası', 
+                        `Status: ${response.status} ${response.statusText}\n` +
+                        `Error: ${errorText}`, 
+                        'error'
+                    );
+                }
+            } catch (error) {
+                addResult('❌ Departman Listesi Bağlantı Hatası', 
+                    `Error: ${error.message}`, 
+                    'error'
+                );
+            }
+        }
+
+        async function testCorsHeaders() {
+            try {
+                addResult('🔄 CORS Test...', 'CORS headers kontrol ediliyor...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/api/Department`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+
+                const corsHeaders = {};
+                response.headers.forEach((value, key) => {
+                    if (key.toLowerCase().includes('access-control')) {
+                        corsHeaders[key] = value;
+                    }
+                });
+
+                addResult('ℹ️ CORS Headers', 
+                    `Status: ${response.status}\n` +
+                    `CORS Headers: ${JSON.stringify(corsHeaders, null, 2)}\n` +
+                    `Origin: ${window.location.origin}`, 
+                    'info'
+                );
+            } catch (error) {
+                addResult('❌ CORS Test Hatası', 
+                    `Error: ${error.message}`, 
+                    'error'
+                );
+            }
+        }
+
+        // Sayfa yüklendiğinde API URL'ini göster
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('api-url').textContent = API_BASE_URL;
+        });
+    </script>
+</body>
+</html> 
