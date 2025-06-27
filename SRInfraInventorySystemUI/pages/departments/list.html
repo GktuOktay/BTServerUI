@@ -15,6 +15,7 @@
 		<link href="../../assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
 		<link href="../../assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
 		<!--end::Global Stylesheets Bundle-->
+		<link rel="stylesheet" href="../../assets/plugins/toastr/toastr.min.css">
 		
 		<!-- SPINNER FORCE HIDE CSS -->
 		<style>
@@ -188,6 +189,11 @@
 			.select2-style .select2-dropdown::-webkit-scrollbar-thumb:hover {
 				background: #a8a8a8;
 			}
+		</style>
+		<style>
+		#toastr-container > div {
+			opacity: 1 !important;
+		}
 		</style>
 	</head>
 	<!--end::Head-->
@@ -586,25 +592,10 @@
 									<select name="parent_department_id" class="form-select form-select-solid" id="parent-department-select">
 										<!-- Dinamik olarak doldurulacak -->
 									</select>
-									<div class="select2-selection">Yükleniyor...</div>
-									<div class="select2-dropdown">
-										<!-- Dinamik olarak doldurulacak -->
-									</div>
 								</div>
 								<!--end::Select-->
 							</div>
 							<!--end::Input group-->
-							<!--begin::Input group-->
-							<div class="fv-row mb-7">
-								<!--begin::Label-->
-								<label class="fw-bold fs-6 mb-2">Yönetici</label>
-								<!--end::Label-->
-								<!--begin::Input-->
-								<input type="text" name="manager_name" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Yönetici adı soyadı" />
-								<!--end::Input-->
-							</div>
-							<!--end::Input group-->
-
 							<!--begin::Actions-->
 							<div class="text-center pt-15">
 								<button type="reset" class="btn btn-light me-3" data-kt-users-modal-action="cancel">İptal</button>
@@ -781,17 +772,6 @@
 									</div>
 								</div>
 								<!--end::Select-->
-							</div>
-							<!--end::Input group-->
-							<!--begin::Input group-->
-							<div class="fv-row mb-7">
-								<!--begin::Label-->
-								<label class="fw-bold fs-6 mb-2">Yönetici</label>
-								<!--end::Label-->
-								<!--begin::Input-->
-								<input type="text" id="edit_manager_name" name="manager_name" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Yönetici adı soyadı" />
-								<!--end::Input-->
-								<div class="error-message" id="edit_manager_name_error"></div>
 							</div>
 							<!--end::Input group-->
 							<!--begin::Input group-->
@@ -1026,6 +1006,12 @@
 		<!--end::Page Custom Javascript-->
 		<!--end::Javascript-->
 		<!--end::Main-->
+		<script src="../../assets/plugins/toastr/toastr.min.js"></script>
+		<script>
+		if (window.toastr) {
+			toastr.options.progressBar = true;
+		}
+		</script>
 	</body>
 	<!--end::Body-->
 </html>

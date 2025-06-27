@@ -104,6 +104,11 @@ class APIConfig {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
+            // 204 No Content ise, body parse etme!
+            if (response.status === 204) {
+                return {};
+            }
+            
             return await response.json();
             
         } catch (error) {
