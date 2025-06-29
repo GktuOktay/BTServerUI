@@ -101,7 +101,27 @@ class APIConfig {
             clearTimeout(timeoutId);
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                let errorData = null;
+                try {
+                    errorData = await response.json();
+                    if (errorData && errorData.message) {
+                        errorMessage = errorData.message;
+                    }
+                } catch (e) {
+                    // JSON parse hatası olabilir, önemli değil
+                }
+                // Eğer API'den açıklayıcı bir mesaj geldiyse warning olarak logla
+                if (errorData && errorData.message) {
+                    console.warn('API Warning:', errorData.message);
+                } else {
+                    // Gerçekten beklenmeyen bir hata varsa error olarak logla
+                    console.error('API Error:', errorMessage);
+                }
+                const error = new Error(errorMessage);
+                error.response = response;
+                error.data = errorData;
+                throw error;
             }
             
             // 204 No Content ise, body parse etme!
@@ -112,7 +132,7 @@ class APIConfig {
             return await response.json();
             
         } catch (error) {
-            console.error('API Error:', error);
+            // Burada tekrar loglama yapmaya gerek yok
             throw error;
         }
     }
