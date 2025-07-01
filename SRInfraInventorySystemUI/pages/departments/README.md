@@ -22,7 +22,10 @@ Bu modül, SR Infra Inventory System içinde departman yönetimi için geliştir
 ```
 pages/departments/
 ├── list.html          # Ana departman listesi sayfası
-├── departments.js     # JavaScript fonksiyonları
+├── js/
+│   ├── department.js          # Sayfaya özel ana dosya
+│   ├── department-manager.js  # Listeleme ve işlemler
+│   └── department-create.js   # Yeni departman fonksiyonları
 ├── config.js          # API konfigürasyonu
 └── README.md          # Bu dosya
 ```
