@@ -166,7 +166,11 @@ export default class DepartmentManager {
         const tableContent = departments.map((dept, index) => {
             const rowNumber = (this.currentPage - 1) * this.pageSize + index + 1;
             const deptName = dept.departmentName || dept.name || '-';
-            const statusBadge = (dept.isActive === true || dept.isActive === 'true')
+            const isActiveField =
+                (dept.isActive !== undefined && dept.isActive !== null)
+                    ? dept.isActive
+                    : (dept.isDeleted !== undefined ? !dept.isDeleted : false);
+            const statusBadge = isActiveField
                 ? '<span class="badge badge-light-success">Aktif</span>'
                 : '<span class="badge badge-light-danger">Pasif</span>';
 
@@ -357,7 +361,11 @@ export default class DepartmentManager {
                 window.select2Instances['edit-parent-department-wrapper'].setValue(parentId);
             }
             if (window.select2Instances['edit-status-wrapper']) {
-                window.select2Instances['edit-status-wrapper'].setValue(department.isActive.toString());
+                const activeField =
+                    (department.isActive !== undefined && department.isActive !== null)
+                        ? department.isActive
+                        : (department.isDeleted !== undefined ? !department.isDeleted : true);
+                window.select2Instances['edit-status-wrapper'].setValue(activeField.toString());
             }
         }
         
@@ -517,14 +525,7 @@ export default class DepartmentManager {
             if (selects.length === 0) return;
 
             selects.forEach(sel => {
-                if (window.jQuery && window.jQuery(sel).data('select2')) {
-                    window.jQuery(sel).select2('destroy');
-                }
-                if (window.jQuery) {
-                    window.jQuery(sel).html('<option value="">Yükleniyor...</option>');
-                } else {
-                    sel.innerHTML = '<option value="">Yükleniyor...</option>';
-                }
+                sel.innerHTML = '<option value="">Yükleniyor...</option>';
             });
 
             const result = await window.APIConfig.apiRequest('/api/departments/root/select-list', { method: 'GET' });
@@ -532,11 +533,7 @@ export default class DepartmentManager {
             const optionsHtml = '<option value="">Üst Departman Yok</option>' + this.buildDepartmentOptions(departments, 0);
 
             selects.forEach(sel => {
-                if (window.jQuery) {
-                    window.jQuery(sel).html(optionsHtml).select2();
-                } else {
-                    sel.innerHTML = optionsHtml;
-                }
+                sel.innerHTML = optionsHtml;
             });
 
             if (window.select2Instances) {
