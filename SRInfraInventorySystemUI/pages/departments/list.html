@@ -31,10 +31,15 @@
 			}
 			
 			/* Backup hide */
-			.spinner-force-hidden {
-				display: none !important;
-				visibility: hidden !important;
-			}
+                        .spinner-force-hidden {
+                                display: none !important;
+                                visibility: hidden !important;
+                        }
+
+                        /* Tüm elemanlarda gereksiz imleç yanıp sönmesini engelle */
+                        body *:not(input):not(textarea):not([contenteditable="true"]) {
+                                caret-color: transparent !important;
+                        }
 			
 			/* Select2 Style Modern Select */
 			.select2-style {
@@ -817,9 +822,8 @@
 		<script src="../../js/api-config.js"></script>
 		
 		<!--begin::Page Custom Javascript-->
-		<script src="../../js/department-api.js"></script>
-		<script src="departments.js"></script>
-		<script src="departments-custom.js"></script>
+                <script src="../../js/department-api.js"></script>
+                <script type="module" src="js/department.js"></script>
 		<!--end::Page Custom Javascript-->
 		<!--end::Javascript-->
 		<!--end::Main-->

@@ -22,7 +22,11 @@ Bu modül, SR Infra Inventory System içinde departman yönetimi için geliştir
 ```
 pages/departments/
 ├── list.html          # Ana departman listesi sayfası
-├── departments.js     # JavaScript fonksiyonları
+├── js/
+│   ├── department.js          # Sayfaya özel ana dosya
+│   ├── department-manager.js  # Listeleme ve işlemler
+│   ├── department-create.js   # Yeni departman fonksiyonları
+│   └── department-filters.js  # Filtre yönetimi
 ├── config.js          # API konfigürasyonu
 └── README.md          # Bu dosya
 ```
@@ -93,15 +97,17 @@ API sunucusu yoksa, kod otomatik olarak test verilerini gösterir.
 ### DepartmentManager Sınıfı
 - `loadDepartments()`: API'den veri çeker
 - `renderTable()`: Tabloyu oluşturur
-- `applyFilters()`: Filtreleri uygular
-- `resetFilters()`: Filtreleri temizler
 - `handleNewDepartment()`: Yeni departman ekler
 - `editDepartment()`: Departman düzenler
 - `deleteDepartment()`: Departman siler
 
+### DepartmentFilters Sınıfı
+- `apply()`: Filtreleri uygular
+- `reset()`: Filtreleri temizler
+
 ### Global Fonksiyonlar
-- `applyFilters()`: HTML'den çağrılır
-- `resetFilters()`: HTML'den çağrılır
+- `applyFilters()`: HTML'den çağrılır, `DepartmentFilters.apply()` metodunu çalıştırır
+- `resetFilters()`: HTML'den çağrılır, `DepartmentFilters.reset()` metodunu çalıştırır
 
 ## Hata Yönetimi
 - API hataları console'da loglanır
