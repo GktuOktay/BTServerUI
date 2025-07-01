@@ -1,5 +1,6 @@
 "use strict";
 import { createDepartment } from './department-create.js';
+import DepartmentFilters from './department-filters.js';
 
 // TOASTR ENTEGRASYONU (sayfanın başında veya uygun bir yerde, bir kere eklenmeli)
 // Eğer zaten ekli değilse, aşağıdaki satırları list.html dosyasına <head> veya <body> sonuna ekleyin:
@@ -13,13 +14,14 @@ export default class DepartmentManager {
         this.pageSize = window.APIConfig.DEFAULT_PAGE_SIZE;
         this.totalRecords = 0;
         
-        // Filters nesnesi
+        // Filtre yöneticisi
         this.filters = {
             name: null,
             isActive: null,
             parentDepartmentId: null
         };
-        
+        this.filterManager = new DepartmentFilters(this);
+
         this.init();
     }
 
@@ -30,29 +32,7 @@ export default class DepartmentManager {
     }
 
     initEventListeners() {
-        // Filtreleme butonları
-        const filterName = document.getElementById('filter-name-card');
-        if (filterName) {
-            filterName.addEventListener('input', (e) => {
-                this.filters.name = e.target.value || null;
-            });
-        }
 
-        const filterStatus = document.getElementById('filter-status-card');
-        if (filterStatus) {
-            filterStatus.addEventListener('change', (e) => {
-                const value = e.target.value;
-                this.filters.isActive = value === '' ? null : value === 'true';
-            });
-        }
-
-        const filterParent = document.getElementById('filter-parent-card');
-        if (filterParent) {
-            filterParent.addEventListener('change', (e) => {
-                const value = e.target.value;
-                this.filters.parentDepartmentId = value === '' ? null : (value === 'null' ? null : value);
-            });
-        }
 
         // Yeni departman formu
         const newDepartmentForm = document.getElementById('new_department_form');
@@ -318,41 +298,6 @@ export default class DepartmentManager {
         }
     }
 
-    // Filtreleri uygula
-    applyFilters() {
-        this.currentPage = 1;
-        this.loadDepartments();
-    }
-
-    // Filtreleri sıfırla
-    resetFilters() {
-        this.filters = {
-            name: null,
-            isActive: null,
-            parentDepartmentId: null
-        };
-        
-        const filterName = document.getElementById('filter-name-card');
-        if (filterName) filterName.value = '';
-        
-        const filterStatus = document.getElementById('filter-status-card');
-        if (filterStatus) filterStatus.value = '';
-        
-        const filterParent = document.getElementById('filter-parent-card');
-        if (filterParent) filterParent.value = '';
-        
-        if (window.select2Instances) {
-            if (window.select2Instances['filter-status-wrapper']) {
-                window.select2Instances['filter-status-wrapper'].setValue('');
-            }
-            if (window.select2Instances['filter-parent-wrapper']) {
-                window.select2Instances['filter-parent-wrapper'].setValue('');
-            }
-        }
-        
-        this.currentPage = 1;
-        this.loadDepartments();
-    }
     // Departman düzenle
     editDepartment(departmentId) {
         this.openEditModal(departmentId);
