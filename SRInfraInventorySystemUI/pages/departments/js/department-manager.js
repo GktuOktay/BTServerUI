@@ -165,7 +165,8 @@ export default class DepartmentManager {
         
         const tableContent = departments.map((dept, index) => {
             const rowNumber = (this.currentPage - 1) * this.pageSize + index + 1;
-            const statusBadge = dept.isActive
+            const deptName = dept.departmentName || dept.name || '-';
+            const statusBadge = (dept.isActive === true || dept.isActive === 'true')
                 ? '<span class="badge badge-light-success">Aktif</span>'
                 : '<span class="badge badge-light-danger">Pasif</span>';
 
@@ -174,7 +175,8 @@ export default class DepartmentManager {
 
             // Açıklama ve yönetici için boş değer kontrolü
             const description = dept.description || '-';
-            const manager = dept.managerName || '-';
+            const manager = dept.managerName || dept.managerPersonnelName || '-';
+            const personnelCount = dept.personCount ?? dept.personnelCount ?? 0;
             
             return `
                 <tr>
@@ -186,7 +188,7 @@ export default class DepartmentManager {
                                 </div>
                             </div>
                             <div class="d-flex justify-content-start flex-column">
-                                <a href="#" class="text-dark fw-bold text-hover-primary fs-6">${dept.departmentName}</a>
+                                <a href="#" class="text-dark fw-bold text-hover-primary fs-6">${deptName}</a>
                                 <span class="text-muted fw-semibold text-muted d-block fs-7">${statusBadge} ${parentDepartmentName}</span>
                             </div>
                         </div>
@@ -198,14 +200,14 @@ export default class DepartmentManager {
                         <span class="text-muted fw-semibold text-muted fs-7">${manager}</span>
                     </td>
                     <td class="text-center">
-                        <span class="badge badge-light-info">${dept.personCount}</span>
+                        <span class="badge badge-light-info">${personnelCount}</span>
                     </td>
                     <td class="text-center">
                         <div class="d-flex justify-content-center gap-2">
                             <button class="btn btn-sm btn-light-warning" onclick="departmentManager.editDepartment('${dept.id}')" title="Düzenle">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-light-danger" onclick="departmentManager.deleteDepartment('${dept.id}', '${dept.departmentName}')" title="Sil">
+                            <button class="btn btn-sm btn-light-danger" onclick="departmentManager.deleteDepartment('${dept.id}', '${deptName}')" title="Sil">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -340,9 +342,9 @@ export default class DepartmentManager {
     // Düzenleme formunu doldur
     populateEditForm(department) {
         document.getElementById('edit_department_id').value = department.id;
-        document.getElementById('edit_department_name').value = department.departmentName;
+        document.getElementById('edit_department_name').value = department.departmentName || department.name || '';
         document.getElementById('edit_department_description').value = department.description || '';
-        document.getElementById('edit_manager_name').value = department.managerName || '';
+        document.getElementById('edit_manager_name').value = department.managerName || department.managerPersonnelName || '';
         
         if (window.select2Instances) {
             if (window.select2Instances['edit-parent-department-wrapper']) {
@@ -428,10 +430,10 @@ export default class DepartmentManager {
         const formData = new FormData(form);
         
         const departmentData = {
-            departmentName: formData.get('department_name'),
+            name: formData.get('department_name'),
             description: formData.get('department_description'),
             parentDepartmentId: formData.get('parent_department_id') || null,
-            managerName: formData.get('manager_name'),
+            managerPersonnelName: formData.get('manager_name'),
             isActive: formData.get('is_active') === 'true'
         };
         

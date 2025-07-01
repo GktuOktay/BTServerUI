@@ -76,8 +76,6 @@ const CONFIG = {
 };
 ```
 
-### Test Modu
-API sunucusu yoksa, kod otomatik olarak test verilerini gösterir.
 
 ## Kullanım
 
@@ -112,7 +110,6 @@ API sunucusu yoksa, kod otomatik olarak test verilerini gösterir.
 ## Hata Yönetimi
 - API hataları console'da loglanır
 - Kullanıcıya toast/alert ile bilgi verilir
-- API yoksa test verisi gösterilir
 
 ## Gelecek Geliştirmeler
 - [ ] Departman düzenleme modalı
