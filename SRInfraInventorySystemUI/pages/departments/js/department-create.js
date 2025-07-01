@@ -5,7 +5,7 @@ export async function createDepartment(form, manager) {
         description = null;
     }
     const departmentData = {
-        name: formData.get('department_name'),
+        departmentName: formData.get('department_name'),
         description,
         parentDepartmentId: formData.get('parent_department_id') || null,
         managerName: formData.get('manager_name'),

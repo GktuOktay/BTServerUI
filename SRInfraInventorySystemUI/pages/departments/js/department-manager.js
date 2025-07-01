@@ -74,6 +74,7 @@ export default class DepartmentManager {
             const result = await DepartmentAPI.getDepartments(params);
             const responseData = result.data || result;
             const departments = responseData.data || [];
+            this.departments = departments;
             const totalCount = responseData.totalCount || departments.length;
             const totalPages = responseData.totalPages || Math.ceil(totalCount / this.pageSize);
 
@@ -164,16 +165,16 @@ export default class DepartmentManager {
         
         const tableContent = departments.map((dept, index) => {
             const rowNumber = (this.currentPage - 1) * this.pageSize + index + 1;
-            const statusBadge = dept.isActive 
+            const statusBadge = dept.isActive
                 ? '<span class="badge badge-light-success">Aktif</span>'
                 : '<span class="badge badge-light-danger">Pasif</span>';
-            
+
             // Üst kategori bilgisini al
             const parentDepartmentName = dept.parentDepartmentName || 'Ana departman';
-            
+
             // Açıklama ve yönetici için boş değer kontrolü
             const description = dept.description || '-';
-            const manager = dept.managerPersonnelName || '-';
+            const manager = dept.managerName || '-';
             
             return `
                 <tr>
@@ -185,7 +186,7 @@ export default class DepartmentManager {
                                 </div>
                             </div>
                             <div class="d-flex justify-content-start flex-column">
-                                <a href="#" class="text-dark fw-bold text-hover-primary fs-6">${dept.name}</a>
+                                <a href="#" class="text-dark fw-bold text-hover-primary fs-6">${dept.departmentName}</a>
                                 <span class="text-muted fw-semibold text-muted d-block fs-7">${statusBadge} ${parentDepartmentName}</span>
                             </div>
                         </div>
@@ -197,14 +198,14 @@ export default class DepartmentManager {
                         <span class="text-muted fw-semibold text-muted fs-7">${manager}</span>
                     </td>
                     <td class="text-center">
-                        <span class="badge badge-light-info">${dept.personnelCount}</span>
+                        <span class="badge badge-light-info">${dept.personCount}</span>
                     </td>
                     <td class="text-center">
                         <div class="d-flex justify-content-center gap-2">
                             <button class="btn btn-sm btn-light-warning" onclick="departmentManager.editDepartment('${dept.id}')" title="Düzenle">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-light-danger" onclick="departmentManager.deleteDepartment('${dept.id}', '${dept.name}')" title="Sil">
+                            <button class="btn btn-sm btn-light-danger" onclick="departmentManager.deleteDepartment('${dept.id}', '${dept.departmentName}')" title="Sil">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -427,7 +428,7 @@ export default class DepartmentManager {
         const formData = new FormData(form);
         
         const departmentData = {
-            name: formData.get('department_name'),
+            departmentName: formData.get('department_name'),
             description: formData.get('department_description'),
             parentDepartmentId: formData.get('parent_department_id') || null,
             managerName: formData.get('manager_name'),
@@ -508,25 +509,33 @@ export default class DepartmentManager {
     // Üst departmanları yükle
     async loadParentDepartments() {
         try {
-            const select = window.jQuery ? window.jQuery('#parent-department-select') : document.getElementById('parent-department-select');
-            if (!select) return;
-            if (window.jQuery && select.data && select.data('select2')) {
-                select.select2('destroy');
-            }
-            if (window.jQuery) {
-                select.html('<option value="">Yükleniyor...</option>');
-            } else {
-                select.innerHTML = '<option value="">Yükleniyor...</option>';
-            }
+            const createSelect = document.getElementById('parent-department-select');
+            const filterSelect = document.getElementById('filter-parent-card');
+            const selects = [createSelect, filterSelect].filter(Boolean);
+            if (selects.length === 0) return;
+
+            selects.forEach(sel => {
+                if (window.jQuery && window.jQuery(sel).data('select2')) {
+                    window.jQuery(sel).select2('destroy');
+                }
+                if (window.jQuery) {
+                    window.jQuery(sel).html('<option value="">Yükleniyor...</option>');
+                } else {
+                    sel.innerHTML = '<option value="">Yükleniyor...</option>';
+                }
+            });
+
             const result = await window.APIConfig.apiRequest('/api/departments/root/select-list', { method: 'GET' });
             const departments = result.data || result;
             const optionsHtml = '<option value="">Üst Departman Yok</option>' + this.buildDepartmentOptions(departments, 0);
-            if (window.jQuery) {
-                select.html(optionsHtml);
-                select.select2();
-            } else {
-                select.innerHTML = optionsHtml;
-            }
+
+            selects.forEach(sel => {
+                if (window.jQuery) {
+                    window.jQuery(sel).html(optionsHtml).select2();
+                } else {
+                    sel.innerHTML = optionsHtml;
+                }
+            });
         } catch (error) {
             console.error('Üst departmanlar yüklenemedi:', error);
         }
@@ -537,9 +546,12 @@ export default class DepartmentManager {
         let options = '';
         const indent = '&nbsp;'.repeat(level * 4); // Her seviye için girinti
         departments.forEach(dept => {
-            options += `<option value="${dept.id}">${indent}${dept.name}</option>`;
-            if (dept.subDepartments && dept.subDepartments.length > 0) {
-                options += this.buildDepartmentOptions(dept.subDepartments, level + 1);
+            const id = dept.id ?? dept.value;
+            const name = dept.name ?? dept.text;
+            options += `<option value="${id}">${indent}${name}</option>`;
+            const children = dept.subDepartments || dept.children || [];
+            if (children.length > 0) {
+                options += this.buildDepartmentOptions(children, level + 1);
             }
         });
         return options;
